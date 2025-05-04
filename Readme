@@ -1,0 +1,11 @@
+# Stock Price Predictor using LSTM
+
+This project uses Long Short-Term Memory (LSTM) neural networks to predict stock closing prices. It fetches historical data using Yahoo Finance and visualizes predicted prices.
+
+## Features
+- Real-time stock data fetching via `yfinance`
+- Data normalization with MinMaxScaler
+- LSTM model using TensorFlow/Keras
+- Graphical comparison of real vs predicted stock prices
+
+## Requirements
