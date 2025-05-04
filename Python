@@ -1,0 +1,50 @@
+# lstm_stock_predictor.py
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import yfinance as yf
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential
+from keras.layers import Dense, LSTM
+
+# Download stock data
+df = yf.download('AAPL', start='2015-01-01', end='2023-01-01')
+data = df[['Close']].values
+
+# Preprocessing
+scaler = MinMaxScaler()
+data_scaled = scaler.fit_transform(data)
+
+train_len = int(len(data_scaled) * 0.8)
+train = data_scaled[:train_len]
+test = data_scaled[train_len - 60:]
+
+# Create dataset
+def create_ds(data, time_step=60):
+    X, y = [], []
+    for i in range(len(data) - time_step):
+        X.append(data[i:i+time_step])
+        y.append(data[i+time_step])
+    return np.array(X), np.array(y)
+
+X_train, y_train = create_ds(train)
+X_test, y_test = create_ds(test)
+
+# Model
+model = Sequential()
+model.add(LSTM(50, return_sequences=True, input_shape=(60, 1)))
+model.add(LSTM(50))
+model.add(Dense(1))
+model.compile(optimizer='adam', loss='mse')
+model.fit(X_train, y_train, epochs=10, batch_size=32)
+
+# Prediction
+predicted = model.predict(X_test)
+predicted = scaler.inverse_transform(predicted)
+real = scaler.inverse_transform(y_test.reshape(-1, 1))
+
+# Plot
+plt.plot(real, label='Real')
+plt.plot(predicted, label='Predicted')
+plt.legend()
+plt.show()
